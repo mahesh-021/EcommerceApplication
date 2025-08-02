@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Register - AlienKart</title>
+  <link rel="stylesheet" href="style.css"/>
+</head>
+<body>
+
+<nav>
+  <div class="logo"><strong>Alien 🛍️</strong></div>
+</nav>
+
+<section class="form-container">
+  <h2>Register</h2>
+  <form id="registerForm">
+    <input type="text" id="regUsername" placeholder="Full Name" required />
+    <input type="email" id="regEmail" placeholder="Email" required />
+    <input type="password" id="regPassword" placeholder="Password (min 6 chars)" required />
+    <button type="submit">Register</button>
+    <p>Already have an account? <a href="login.html">Login</a></p>
+  </form>
+</section>
+
+<script>
+  document.getElementById("registerForm").addEventListener("submit", async function(e) {
+    e.preventDefault();
+
+    const username = document.getElementById("regUsername").value.trim();
+    const email = document.getElementById("regEmail").value.trim();
+    const password = document.getElementById("regPassword").value.trim();
+
+    if (!username || !email || !password) {
+      alert("⚠️ Please fill in all fields!");
+      return;
+    }
+
+    if (password.length < 6) {
+      alert("⚠️ Password must be at least 6 characters.");
+      return;
+    }
+
+    try {
+      const response = await fetch("http://localhost:8080/api/user/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name: username, email, password }) // 👈 Correct field name
+      });
+
+      if (response.ok) {
+        alert("✅ Registered successfully! Please login.");
+        window.location.href = "login.html";
+      } else if (response.status === 409) {
+        alert("❌ Email already registered. Try logging in.");
+      } else {
+        const errorText = await response.text();
+        alert("❌ Registration failed: " + errorText);
+      }
+
+    } catch (error) {
+      console.error("Error:", error);
+      alert("❌ Something went wrong. Check backend/server.");
+    }
+  });
+</script>
+
+</body>
+</html>

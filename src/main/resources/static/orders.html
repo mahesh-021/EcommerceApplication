@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Your Orders - AlienKart</title>
+  <link rel="stylesheet" href="style.css"/>
+</head>
+<body>
+
+<nav>
+  <div class="logo"><strong>Alien 🛍️</strong></div>
+  <div class="nav-links">
+    <a href="index.html">Home</a>
+    <a href="cart.html">Cart</a>
+    <a href="orders.html">Orders</a>
+  </div>
+</nav>
+
+<section class="container">
+  <h1>📦 Your Order History</h1>
+  <div id="orderList">Loading...</div>
+  <button onclick="logout()">Logout</button>
+</section>
+
+<script>
+  function logout() {
+    localStorage.clear();
+    window.location.href = "login.html";
+  }
+
+  async function loadOrders() {
+    const user = JSON.parse(localStorage.getItem("user"));
+    if (!user || !user.id) {
+      alert("⚠️ Please login to view orders");
+      window.location.href = "login.html";
+      return;
+    }
+
+    try {
+      const response = await fetch(`http://localhost:8080/orders/user/${user.id}`);
+      if (!response.ok) {
+        throw new Error("Failed to fetch orders");
+      }
+
+      const orders = await response.json();
+      displayOrders(orders);
+    } catch (error) {
+      document.getElementById("orderList").innerHTML = `<p style="color:red;">⚠️ Error loading orders.</p>`;
+      console.error("Error fetching orders:", error);
+    }
+  }
+
+  function displayOrders(orders) {
+    const container = document.getElementById("orderList");
+    container.innerHTML = "";
+
+    if (!orders.length) {
+      container.innerHTML = "<p>🪐 No orders yet. Start shopping!</p>";
+      return;
+    }
+
+    orders.forEach(order => {
+      const orderDiv = document.createElement("div");
+      orderDiv.className = "order-card";
+
+      const date = new Date(order.timestamp || Date.now()).toLocaleString();
+
+      const productList = order.products.map(p => `
+        <li><strong>${p.name}</strong> – ₹${p.price}</li>
+      `).join("");
+
+      orderDiv.innerHTML = `
+        <h3>🧾 Order ID: ${order.id}</h3>
+        <p><strong>Date:</strong> ${date}</p>
+        <ul>${productList}</ul>
+        <hr/>
+      `;
+
+      container.appendChild(orderDiv);
+    });
+  }
+
+  loadOrders(); // Auto load
+</script>
+
+</body>
+</html>

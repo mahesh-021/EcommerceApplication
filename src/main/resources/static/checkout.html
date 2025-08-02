@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Checkout - AlienKart</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <link rel="stylesheet" href="style.css"/>
+  <script>
+    async function placeOrder() {
+      const user = JSON.parse(localStorage.getItem("user"));
+      const cart = JSON.parse(localStorage.getItem("cart")) || [];
+
+      if (!user || !user.id) {
+        alert("⚠️ Please login to checkout.");
+        window.location.href = "login.html";
+        return;
+      }
+
+      if (cart.length === 0) {
+        alert("🛒 Your cart is empty!");
+        window.location.href = "cart.html";
+        return;
+      }
+
+      try {
+        const response = await fetch("http://localhost:8080/api/order/place", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            userId: user.id,
+            products: cart
+          })
+        });
+
+        if (!response.ok) {
+          throw new Error("❌ Order placement failed!");
+        }
+
+        localStorage.removeItem("cart"); // ✅ Clear cart
+        alert("✅ Order placed successfully!");
+        window.location.href = "orders.html";
+      } catch (error) {
+        console.error("Checkout error:", error);
+        alert("Something went wrong during checkout.");
+      }
+    }
+
+    // 🚀 Auto-trigger when page loads
+    window.onload = placeOrder;
+  </script>
+</head>
+<body>
+<section class="container" style="text-align: center;">
+  <h2>Processing your order...</h2>
+  <p>Please wait, we are placing your order...</p>
+</section>
+</body>
+</html>

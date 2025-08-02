@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Your Cart - AlienKart</title>
+  <link rel="stylesheet" href="style.css"/>
+</head>
+<body>
+
+<nav>
+  <div class="logo"><strong>Alien 🛍️</strong></div>
+  <div class="nav-links">
+    <a href="index.html">Home</a>
+    <a href="cart.html">Cart</a>
+    <a href="orders.html">Orders</a>
+  </div>
+</nav>
+
+<section class="container">
+  <h1>🛒 Your Cart</h1>
+  <div id="cart-items">
+    <!-- JS will render cart items here -->
+  </div>
+  <h2 id="total">Total: ₹0</h2>
+  <button onclick="checkout()">✅ Proceed to Checkout</button>
+</section>
+
+<script>
+  function loadCart() {
+    const cartItemsContainer = document.getElementById("cart-items");
+    const cart = JSON.parse(localStorage.getItem("cart")) || [];
+    cartItemsContainer.innerHTML = ""; // Clear old items
+
+    let total = 0;
+
+    if (cart.length === 0) {
+      cartItemsContainer.innerHTML = "<p>Your cart is empty 🫥</p>";
+      document.getElementById("total").style.display = "none";
+      return;
+    }
+
+    cart.forEach((item, index) => {
+      const div = document.createElement("div");
+      div.className = "cart-item";
+      div.innerHTML = `
+        <p><strong>${item.name}</strong></p>
+        <p>Price: ₹${item.price}</p>
+        <p>Quantity: ${item.quantity}</p>
+        <button onclick="removeFromCart(${index})">❌ Remove</button>
+        <hr>
+      `;
+      total += item.price * item.quantity;
+      cartItemsContainer.appendChild(div);
+    });
+
+    document.getElementById("total").innerText = `Total: ₹${total}`;
+    document.getElementById("total").style.display = "block";
+  }
+
+  function removeFromCart(index) {
+    let cart = JSON.parse(localStorage.getItem("cart")) || [];
+    cart.splice(index, 1);
+    localStorage.setItem("cart", JSON.stringify(cart));
+    loadCart();
+  }
+
+  function checkout() {
+    if (!localStorage.getItem("cart") || JSON.parse(localStorage.getItem("cart")).length === 0) {
+      alert("Your cart is empty!");
+      return;
+    }
+    alert("Thanks for shopping with AlienKart! 🚀");
+    localStorage.removeItem("cart");
+    loadCart();
+  }
+
+  window.onload = loadCart;
+</script>
+
+</body>
+</html>
